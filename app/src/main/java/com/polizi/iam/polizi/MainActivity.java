@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.parse.ParseInstallation;
 import com.polizi.iam.polizi.adapters.FragmentPageAdapter;
 
 public class MainActivity extends AppCompatActivity
@@ -25,7 +26,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        //For Push Notification
+        ParseInstallation.getCurrentInstallation().saveInBackground();
         //Fragment Loader for
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         viewPager.setAdapter(new FragmentPageAdapter(getSupportFragmentManager(),
