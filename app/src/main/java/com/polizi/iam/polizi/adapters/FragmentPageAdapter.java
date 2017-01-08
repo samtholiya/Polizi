@@ -4,15 +4,17 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.util.Log;
 
+import com.polizi.iam.polizi.user.fragments.CreateUser;
 import com.polizi.iam.polizi.user.fragments.Login;
 
 /**
  * Created by shubh on 04-01-2017.
  */
 public class FragmentPageAdapter extends FragmentPagerAdapter {
-    final int PAGE_COUNT = 1;
-    private String tabTitles[] = new String[] { "Tab1", "Tab2", "Tab3" };
+    final int PAGE_COUNT = 2;
+    private String tabTitles[] = new String[] { "Check In", "Create User", "Tab3" };
     private Context context;
 
     public FragmentPageAdapter(FragmentManager fm, Context context) {
@@ -27,8 +29,12 @@ public class FragmentPageAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        if(position == 0) {
-            return Login.newInstance();
+        Log.d("FragmentPageAdapter", String.valueOf(position));
+        switch (position) {
+            case 0:
+                return Login.newInstance();
+            case 1:
+                return CreateUser.newInstance();
         }
         return null;
     }
@@ -36,7 +42,7 @@ public class FragmentPageAdapter extends FragmentPagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
         // Generate title based on item position
-        return "Check In";
+        return tabTitles[position];
 
     }
 }

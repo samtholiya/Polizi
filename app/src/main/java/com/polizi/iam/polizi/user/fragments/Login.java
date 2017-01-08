@@ -1,19 +1,27 @@
 package com.polizi.iam.polizi.user.fragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
+import com.parse.LogInCallback;
+import com.parse.ParseException;
+import com.parse.ParseUser;
 import com.polizi.iam.polizi.R;
+import com.polizi.iam.polizi.coordinators.OnFragmentInteractionListener;
+import com.polizi.iam.polizi.models.PoliziUser;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link Login.OnFragmentInteractionListener} interface
+ * {@link OnFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link Login#newInstance} factory method to
  * create an instance of this fragment.
@@ -30,6 +38,12 @@ public class Login extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private View mView;
+
+    private EditText mUser, mPassword;
+    private Button mLogin;
+
+    private boolean isLoggedIn;
     public Login() {
         // Required empty public constructor
     }
@@ -57,13 +71,58 @@ public class Login extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_login, container, false);
+        mView = inflater.inflate(R.layout.fragment_login, container, false);
+        mUser = (EditText) mView.findViewById(R.id.login_user_name);
+        mPassword = (EditText) mView.findViewById(R.id.login_password);
+        mLogin = (Button) mView.findViewById(R.id.login_button);
+        mLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (loginUser()) {
+                    mListener.onFragmentInteraction(3);
+                    Log.d("Login",PoliziUser.getCurrentUser().getUsername());
+                }
+
+            }
+        });
+
+        return mView;
+    }
+
+    private boolean loginUser() {
+        isLoggedIn=false;
+        String username = mUser.getText().toString();
+        String password = mPassword.getText().toString();
+
+        if (username.isEmpty()) {
+            Snackbar.make(mView, R.string.user_name_empty, Snackbar.LENGTH_LONG).show();
+            return isLoggedIn;
+        }
+        if (password.isEmpty()) {
+            Snackbar.make(mView, R.string.password_empty, Snackbar.LENGTH_LONG).show();
+            return isLoggedIn;
+        }
+
+        PoliziUser.logInInBackground(username, password, new LogInCallback() {
+            @Override
+            public void done(ParseUser user, ParseException e) {
+
+                if (e == null) {
+                    if (user instanceof PoliziUser) {
+                        isLoggedIn = true;
+                    }
+                } else {
+                    Snackbar.make(mView,R.string.incorrect_login_credentials,Snackbar.LENGTH_LONG).show();
+                }
+            }
+        });
+        return isLoggedIn;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void loggedIn() {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onFragmentInteraction(2);
         }
     }
 
@@ -82,20 +141,5 @@ public class Login extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
     }
 }

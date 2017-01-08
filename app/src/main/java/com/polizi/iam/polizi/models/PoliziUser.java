@@ -7,13 +7,23 @@ import com.parse.ParseUser;
  */
 
 public class PoliziUser extends ParseUser {
-    public void setName(String name){
-        put("name",name);
+
+    public void setProId(String proId){
+        put("proId",proId);
     }
 
-    public String getName(){
-        return get("name").toString();
+    public String getProId(){
+        return get("proId").toString();
     }
+
+    public void setProfileName(String name){
+        put("profileName",name);
+    }
+
+    public String getProfileName(){
+        return get("profileName").toString();
+    }
+
     public void setMobileNumber(String number){
         put("number",number);
     }

@@ -3,7 +3,6 @@ package com.polizi.iam.polizi;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -16,10 +15,15 @@ import android.view.View;
 
 import com.parse.ParseInstallation;
 import com.polizi.iam.polizi.adapters.FragmentPageAdapter;
+import com.polizi.iam.polizi.coordinators.OnFragmentInteractionListener;
+
+import static com.polizi.iam.polizi.R.id.fab;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
 
+    private FloatingActionButton mCreateUserFAB;
+    private ViewPager mViewPager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,16 +33,15 @@ public class MainActivity extends AppCompatActivity
         //For Push Notification
         ParseInstallation.getCurrentInstallation().saveInBackground();
         //Fragment Loader for
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-        viewPager.setAdapter(new FragmentPageAdapter(getSupportFragmentManager(),
+        mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        mViewPager.setAdapter(new FragmentPageAdapter(getSupportFragmentManager(),
                 MainActivity.this));
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        mCreateUserFAB = (FloatingActionButton) findViewById(fab);
+        mCreateUserFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                onFragmentInteraction(1);
+                mCreateUserFAB.hide();
             }
         });
 
@@ -57,7 +60,9 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        } else if (mViewPager.getCurrentItem() > 0)
+            onFragmentInteraction(0);
+        else {
             super.onBackPressed();
         }
     }
@@ -107,5 +112,12 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onFragmentInteraction(int pageNumber) {
+        if (pageNumber == 0)
+            mCreateUserFAB.show();
+        mViewPager.setCurrentItem(pageNumber, true);
     }
 }

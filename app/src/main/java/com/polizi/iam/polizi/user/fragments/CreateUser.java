@@ -1,19 +1,23 @@
 package com.polizi.iam.polizi.user.fragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.polizi.iam.polizi.R;
+import com.polizi.iam.polizi.coordinators.OnFragmentInteractionListener;
+import com.polizi.iam.polizi.models.PoliziUser;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link CreateUser.OnFragmentInteractionListener} interface
+ * {@link OnFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link CreateUser#newInstance} factory method to
  * create an instance of this fragment.
@@ -28,6 +32,11 @@ public class CreateUser extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private EditText mProfileName, mUserName, mAddress,
+            mMobileNumber, mDesignation, mPassword,
+            mRetypePassword, mPoliceStation;
+    private View mView;
+    private Button mCreateUser;
     private OnFragmentInteractionListener mListener;
 
     public CreateUser() {
@@ -38,16 +47,13 @@ public class CreateUser extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment CreateUser.
      */
-    // TODO: Rename and change types and number of parameters
-    public static CreateUser newInstance(String param1, String param2) {
+    public static CreateUser newInstance() {
         CreateUser fragment = new CreateUser();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        /*args.putString(ARG_PARAM1, param1);
+        args.putString(ARG_PARAM2, param2);*/
         fragment.setArguments(args);
         return fragment;
     }
@@ -65,14 +71,91 @@ public class CreateUser extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_create_user, container, false);
+        mView = inflater.inflate(R.layout.fragment_create_user, container, false);
+
+        mProfileName = (EditText) mView.findViewById(R.id.profile_name);
+        mAddress = (EditText) mView.findViewById(R.id.address);
+        mMobileNumber = (EditText) mView.findViewById(R.id.mobile_number);
+        mDesignation = (EditText) mView.findViewById(R.id.designation);
+        mPassword = (EditText) mView.findViewById(R.id.password);
+        mRetypePassword = (EditText) mView.findViewById(R.id.retype_password);
+        mUserName = (EditText) mView.findViewById(R.id.user_name);
+        mPoliceStation = (EditText) mView.findViewById(R.id.police_station);
+
+        mCreateUser = (Button) mView.findViewById(R.id.create_user);
+        mCreateUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onCreatePressed();
+            }
+        });
+
+        return mView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+    public void onCreatePressed() {
+        if (mListener != null && createUser()) {
+            mListener.onFragmentInteraction(0);
         }
+    }
+
+    private boolean createUser() {
+        PoliziUser user = new PoliziUser();
+        if (!mProfileName.getText().toString().isEmpty())
+            user.setProfileName(mProfileName.getText().toString());
+        else {
+            Snackbar.make(mView, R.string.name_empty, Snackbar.LENGTH_LONG).show();
+            return false;
+        }
+        if (!mUserName.getText().toString().isEmpty())
+            user.setUsername(mUserName.getText().toString());
+        else {
+            Snackbar.make(mView, R.string.user_name_empty, Snackbar.LENGTH_LONG).show();
+            return false;
+        }
+        if (!mPassword.getText().toString().isEmpty()) {
+            if (mRetypePassword.getText().toString().isEmpty()) {
+                Snackbar.make(mView, R.string.retype_password_empty, Snackbar.LENGTH_LONG).show();
+                return false;
+            }
+            if(mPassword.getText().toString().equals(mRetypePassword.getText().toString()))
+                user.setPassword(mPassword.getText().toString());
+            else {
+                Snackbar.make(mView, R.string.password_mismatch, Snackbar.LENGTH_LONG).show();
+                return false;
+            }
+        } else {
+            Snackbar.make(mView, R.string.password_empty, Snackbar.LENGTH_LONG).show();
+            return false;
+        }
+
+        if (!mMobileNumber.getText().toString().isEmpty())
+            user.setMobileNumber(mMobileNumber.getText().toString());
+        else {
+            Snackbar.make(mView, R.string.mobile_number_empty, Snackbar.LENGTH_LONG).show();
+            return false;
+        }
+        if (!mAddress.getText().toString().isEmpty())
+            user.setAddress(mAddress.getText().toString());
+        else {
+            Snackbar.make(mView, R.string.address_empty, Snackbar.LENGTH_LONG).show();
+            return false;
+        }
+        if (!mDesignation.getText().toString().isEmpty())
+            user.setDesignation(mDesignation.getText().toString());
+        else {
+            Snackbar.make(mView, R.string.designation_empty, Snackbar.LENGTH_LONG).show();
+            return false;
+        }
+        if (!mPoliceStation.getText().toString().isEmpty())
+            user.setPoliceStation(mPoliceStation.getText().toString());
+        else {
+            Snackbar.make(mView, R.string.police_station_empty, Snackbar.LENGTH_LONG).show();
+            return false;
+        }
+        user.signUpInBackground();
+        return true;
     }
 
     @Override
@@ -92,18 +175,5 @@ public class CreateUser extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
+
 }

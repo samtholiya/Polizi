@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "885391099200",
+    "firebase_url": "https://polizi-7bd25.firebaseio.com",
+    "project_id": "polizi-7bd25",
+    "storage_bucket": "polizi-7bd25.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:885391099200:android:d131472a40299db2",
+        "android_client_info": {
+          "package_name": "com.polizi.iam.polizi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "885391099200-pr7qcs8jr95ujkcm2scnvv8qt7efkmfh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.polizi.iam.polizi",
+            "certificate_hash": "623F247B7370D0DA703E6CBA1D9BF5499666E6BE"
+          }
+        },
+        {
+          "client_id": "885391099200-ab2h2bq2q0ua2g3h8hg4073o2a5q1pkq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAb3vWP4B6Q8rUIW-5RN-kp5p-5CmFnPNM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "885391099200-ab2h2bq2q0ua2g3h8hg4073o2a5q1pkq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
