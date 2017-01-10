@@ -7,5 +7,4 @@ package com.polizi.iam.polizi.coordinators;
 public interface OnFragmentInteractionListener {
 
     void onFragmentInteraction(int pageNumber);
-
 }

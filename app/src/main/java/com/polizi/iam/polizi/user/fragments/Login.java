@@ -16,6 +16,7 @@ import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.polizi.iam.polizi.R;
 import com.polizi.iam.polizi.coordinators.OnFragmentInteractionListener;
+import com.polizi.iam.polizi.coordinators.OnLoginListener;
 import com.polizi.iam.polizi.models.PoliziUser;
 
 /**
@@ -39,6 +40,7 @@ public class Login extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private View mView;
+    private OnLoginListener mLoginListener;
 
     private EditText mUser, mPassword;
     private Button mLogin;
@@ -79,6 +81,7 @@ public class Login extends Fragment {
             @Override
             public void onClick(View v) {
                 if (loginUser()) {
+
                     mListener.onFragmentInteraction(3);
                     Log.d("Login",PoliziUser.getCurrentUser().getUsername());
                 }
@@ -110,6 +113,7 @@ public class Login extends Fragment {
                 if (e == null) {
                     if (user instanceof PoliziUser) {
                         isLoggedIn = true;
+                        mLoginListener.onLoginUpdate();
                     }
                 } else {
                     Snackbar.make(mView,R.string.incorrect_login_credentials,Snackbar.LENGTH_LONG).show();
@@ -129,6 +133,9 @@ public class Login extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        if(context instanceof OnLoginListener) {
+            mLoginListener = (OnLoginListener) context;
+        }
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {

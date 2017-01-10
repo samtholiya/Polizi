@@ -8,13 +8,14 @@ import android.util.Log;
 
 import com.polizi.iam.polizi.user.fragments.CreateUser;
 import com.polizi.iam.polizi.user.fragments.Login;
+import com.polizi.iam.polizi.user.fragments.UserDashboard;
 
 /**
  * Created by shubh on 04-01-2017.
  */
 public class FragmentPageAdapter extends FragmentPagerAdapter {
-    final int PAGE_COUNT = 2;
-    private String tabTitles[] = new String[] { "Check In", "Create User", "Tab3" };
+    private final int PAGE_COUNT = 3;
+    private String tabTitles[] = new String[] { "Check In", "Create User", "Dashboard" };
     private Context context;
 
     public FragmentPageAdapter(FragmentManager fm, Context context) {
@@ -35,6 +36,8 @@ public class FragmentPageAdapter extends FragmentPagerAdapter {
                 return Login.newInstance();
             case 1:
                 return CreateUser.newInstance();
+            case 2:
+                return UserDashboard.newInstance();
         }
         return null;
     }

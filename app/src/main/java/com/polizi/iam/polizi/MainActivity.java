@@ -12,18 +12,26 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.parse.ParseInstallation;
+import com.parse.ParseUser;
 import com.polizi.iam.polizi.adapters.FragmentPageAdapter;
 import com.polizi.iam.polizi.coordinators.OnFragmentInteractionListener;
+import com.polizi.iam.polizi.coordinators.OnLoginListener;
+import com.polizi.iam.polizi.models.PoliziUser;
 
 import static com.polizi.iam.polizi.R.id.fab;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener, OnLoginListener {
 
     private FloatingActionButton mCreateUserFAB;
     private ViewPager mViewPager;
+    private View mNavHeaderView;
+    private NavigationView mNavigationView;
+    private boolean isLoggedIn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +44,8 @@ public class MainActivity extends AppCompatActivity
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
         mViewPager.setAdapter(new FragmentPageAdapter(getSupportFragmentManager(),
                 MainActivity.this));
+
+
         mCreateUserFAB = (FloatingActionButton) findViewById(fab);
         mCreateUserFAB.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,14 +55,27 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
+        mNavHeaderView = mNavigationView.getHeaderView(0);
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+
+
+        ParseUser parseUser = PoliziUser.getCurrentUser();
+        if (parseUser != null) {
+            if (parseUser instanceof PoliziUser) {
+                onLoginUpdate();
+                onFragmentInteraction(2);
+                isLoggedIn = true;
+            }
+        } else
+            isLoggedIn = false;
     }
 
     @Override
@@ -70,7 +93,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+
+        if (isLoggedIn)
+            getMenuInflater().inflate(R.menu.main_logged_in, menu);
+        else
+            getMenuInflater().inflate(R.menu.main, menu);
+
         return true;
     }
 
@@ -83,6 +111,11 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+        if (id == R.id.action_log_out) {
+            PoliziUser.logOut();
+            onFragmentInteraction(0);
             return true;
         }
 
@@ -118,6 +151,27 @@ public class MainActivity extends AppCompatActivity
     public void onFragmentInteraction(int pageNumber) {
         if (pageNumber == 0)
             mCreateUserFAB.show();
+        else
+            mCreateUserFAB.hide();
         mViewPager.setCurrentItem(pageNumber, true);
+    }
+
+    @Override
+    public void onLoginUpdate() {
+
+        ParseUser parseUser = PoliziUser.getCurrentUser();
+        if (parseUser instanceof PoliziUser) {
+            PoliziUser poliziUser = (PoliziUser) parseUser;
+            TextView userTextView = (TextView) mNavHeaderView.findViewById(R.id.nav_user_name);
+            TextView designationTextView = (TextView) mNavHeaderView.findViewById(R.id.nav_designation);
+            String profileName = poliziUser.getProfileName();
+            String designation = poliziUser.getDesignation();
+            if (!profileName.isEmpty())
+                userTextView.setText(profileName);
+            if (!designation.isEmpty())
+                designationTextView.setText(designation);
+            onFragmentInteraction(2);
+        }
+
     }
 }
