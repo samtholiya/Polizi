@@ -14,6 +14,8 @@ import com.polizi.iam.polizi.R;
 import com.polizi.iam.polizi.coordinators.OnFragmentInteractionListener;
 import com.polizi.iam.polizi.models.PoliziUser;
 
+import java.util.regex.Pattern;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -102,8 +104,12 @@ public class CreateUser extends Fragment {
 
     private boolean createUser() {
         PoliziUser user = new PoliziUser();
+        Pattern patternName = Pattern.compile("^[a-zA-z\\s]+$");
         if (!mProfileName.getText().toString().isEmpty())
-            user.setProfileName(mProfileName.getText().toString());
+            if (patternName.matcher(mProfileName.getText().toString()).matches())
+                user.setProfileName(mProfileName.getText().toString());
+            else
+                Snackbar.make(mView, R.string.name, Snackbar.LENGTH_LONG).show();
         else {
             Snackbar.make(mView, R.string.name_empty, Snackbar.LENGTH_LONG).show();
             return false;
@@ -119,7 +125,7 @@ public class CreateUser extends Fragment {
                 Snackbar.make(mView, R.string.retype_password_empty, Snackbar.LENGTH_LONG).show();
                 return false;
             }
-            if(mPassword.getText().toString().equals(mRetypePassword.getText().toString()))
+            if (mPassword.getText().toString().equals(mRetypePassword.getText().toString()))
                 user.setPassword(mPassword.getText().toString());
             else {
                 Snackbar.make(mView, R.string.password_mismatch, Snackbar.LENGTH_LONG).show();

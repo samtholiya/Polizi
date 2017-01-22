@@ -80,6 +80,16 @@ public class Login extends Fragment {
         mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                /*double latitude = 40.714728;
+                double longitude = -73.998672;
+                String label = "ABC Label";
+                String uriBegin = "geo:" + latitude + "," + longitude;
+                String query = latitude + "," + longitude + "(" + label + ")";
+                String encodedQuery = Uri.encode(query);
+                String uriString = uriBegin + "?q=" + encodedQuery + "&z=16";
+                Uri uri = Uri.parse(uriString);
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW, uri);
+                startActivity(intent);*/
                 if (loginUser()) {
 
                     mListener.onFragmentInteraction(3);
@@ -114,6 +124,7 @@ public class Login extends Fragment {
                     if (user instanceof PoliziUser) {
                         isLoggedIn = true;
                         mLoginListener.onLoginUpdate();
+                        mListener.onFragmentInteraction(3);
                     }
                 } else {
                     Snackbar.make(mView,R.string.incorrect_login_credentials,Snackbar.LENGTH_LONG).show();

@@ -1,36 +1,55 @@
 package com.polizi.iam.polizi;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.parse.LogOutCallback;
+import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 import com.polizi.iam.polizi.adapters.FragmentPageAdapter;
 import com.polizi.iam.polizi.coordinators.OnFragmentInteractionListener;
 import com.polizi.iam.polizi.coordinators.OnLoginListener;
 import com.polizi.iam.polizi.models.PoliziUser;
+import com.polizi.iam.polizi.service.LocationService;
+import com.polizi.iam.polizi.settings.SettingsActivity;
 
+import static com.parse.ParseInstallation.getCurrentInstallation;
 import static com.polizi.iam.polizi.R.id.fab;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnFragmentInteractionListener, OnLoginListener {
+        implements OnFragmentInteractionListener, OnLoginListener {
 
     private FloatingActionButton mCreateUserFAB;
     private ViewPager mViewPager;
     private View mNavHeaderView;
     private NavigationView mNavigationView;
     private boolean isLoggedIn;
+    private Menu mMenu;
+    private Handler mHandler;
+    private LocationRequest mLocationRequest;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +57,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        //For Push Notification
-        ParseInstallation.getCurrentInstallation().saveInBackground();
         //Fragment Loader for
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
         mViewPager.setAdapter(new FragmentPageAdapter(getSupportFragmentManager(),
@@ -54,38 +71,39 @@ public class MainActivity extends AppCompatActivity
                 mCreateUserFAB.hide();
             }
         });
+        mHandler = new Handler();
 
-        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
-        mNavigationView.setNavigationItemSelectedListener(this);
-        mNavHeaderView = mNavigationView.getHeaderView(0);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        onLoginUpdate();
+
+
+        /*DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        toggle.syncState();*/
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API)
+                .addApi(LocationServices.API).build();
 
-
-        ParseUser parseUser = PoliziUser.getCurrentUser();
-        if (parseUser != null) {
-            if (parseUser instanceof PoliziUser) {
-                onLoginUpdate();
-                onFragmentInteraction(2);
-                isLoggedIn = true;
-            }
-        } else
-            isLoggedIn = false;
     }
 
     @Override
+    protected void onPostResume() {
+        super.onPostResume();
+    }
+
+
+    @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else if (mViewPager.getCurrentItem() > 0)
-            onFragmentInteraction(0);
-        else {
+        if (mViewPager.getCurrentItem() > 0) {
+            if (isLoggedIn)
+                onFragmentInteraction(3);
+            else
+                onFragmentInteraction(0);
+        } else {
             super.onBackPressed();
         }
     }
@@ -93,11 +111,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        mMenu = menu;
+        getMenuInflater().inflate(R.menu.main, menu);
 
-        if (isLoggedIn)
-            getMenuInflater().inflate(R.menu.main_logged_in, menu);
-        else
-            getMenuInflater().inflate(R.menu.main, menu);
 
         return true;
     }
@@ -109,42 +125,31 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
         if (id == R.id.action_log_out) {
-            PoliziUser.logOut();
-            onFragmentInteraction(0);
+            PoliziUser.logOutInBackground(
+                    new LogOutCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            //clear the installation backend
+
+                            mMenu.findItem(R.id.action_log_out).setVisible(false);
+                            onFragmentInteraction(0);
+                            onLoginUpdate();
+                        }
+                    }
+            );
             return true;
         }
 
+        if(id == R.id.settings_menu){
+            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+            startActivity(intent);
+        }
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
+    private void onLogoutParse() {
+        getCurrentInstallation().put("isLoggedIn",false);
     }
 
     @Override
@@ -159,19 +164,81 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLoginUpdate() {
 
+        Log.d("Main", "here reached");
         ParseUser parseUser = PoliziUser.getCurrentUser();
-        if (parseUser instanceof PoliziUser) {
-            PoliziUser poliziUser = (PoliziUser) parseUser;
-            TextView userTextView = (TextView) mNavHeaderView.findViewById(R.id.nav_user_name);
-            TextView designationTextView = (TextView) mNavHeaderView.findViewById(R.id.nav_designation);
-            String profileName = poliziUser.getProfileName();
-            String designation = poliziUser.getDesignation();
-            if (!profileName.isEmpty())
-                userTextView.setText(profileName);
-            if (!designation.isEmpty())
-                designationTextView.setText(designation);
+        if (parseUser == null) {
+            Runnable menuItem = new Runnable() {
+                @Override
+                public void run() {
+                    stopService(new Intent(getApplicationContext(), LocationService.class));
+                    if(mMenu!=null) {
+                        MenuItem item = mMenu.findItem(R.id.action_log_out);
+                        if (item != null)
+                            item.setVisible(false);
+                        else
+                            mHandler.postDelayed(this, 500);
+                    }else{
+                        mHandler.postDelayed(this, 500);
+                    }
+                }
+            };
+            mHandler.postDelayed(menuItem, 1000);
+            isLoggedIn = false;
+            ParseInstallation installation =ParseInstallation.getCurrentInstallation();
+            installation.put("isLoggedIn",false);
+            installation.saveInBackground();
+        } else if (parseUser instanceof PoliziUser) {
+            ParseInstallation installation =ParseInstallation.getCurrentInstallation();
+            installation.put("isLoggedIn",true);
+            installation.saveInBackground();
+            isLoggedIn = true;
             onFragmentInteraction(2);
+            Runnable menuItem = new Runnable() {
+                @Override
+                public void run() {
+                    startService(new Intent(getApplicationContext(), LocationService.class));
+                    mMenu.findItem(R.id.action_log_out).setVisible(true);
+                }
+            };
+            mHandler.postDelayed(menuItem, 1000);
+            getCurrentInstallation().put("isLoggedIn",true);
         }
 
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
     }
 }

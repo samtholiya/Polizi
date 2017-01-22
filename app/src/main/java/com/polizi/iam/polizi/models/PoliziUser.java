@@ -55,4 +55,8 @@ public class PoliziUser extends ParseUser {
     public String getPoliceStation(){
         return get("policeStation").toString();
     }
+
+
+
+
 }

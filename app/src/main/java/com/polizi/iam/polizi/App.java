@@ -16,7 +16,7 @@ public class App extends Application {
         super.onCreate();
         ParseObject.registerSubclass(PoliziUser.class);
         Parse.initialize(new Parse.Configuration.Builder(getApplicationContext())
-                .applicationId("SammyAppId")
+                .applicationId("myAppPolizi")
                 .enableLocalDataStore()
                 .server("http://192.168.43.123:1337/parse/")
                 .build());
