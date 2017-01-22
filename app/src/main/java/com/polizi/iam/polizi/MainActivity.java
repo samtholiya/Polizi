@@ -138,13 +138,12 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
             );
+        if(id == R.id.settings_menu){
+            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+        }
             return true;
         }
 
-        if(id == R.id.settings_menu){
-            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-            startActivity(intent);
-        }
         return super.onOptionsItemSelected(item);
     }
 

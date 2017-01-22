@@ -30,9 +30,12 @@ import com.parse.ParseUser;
 import com.polizi.iam.polizi.R;
 import com.polizi.iam.polizi.coordinators.OnFragmentInteractionListener;
 import com.polizi.iam.polizi.models.PoliziUser;
-import com.polizi.iam.polizi.service.GPSService;
 
 import java.util.HashMap;
+
+import static com.polizi.iam.polizi.coordinators.SharedRuntimeContent.GPS_FILTER;
+import static com.polizi.iam.polizi.coordinators.SharedRuntimeContent.GPS_LATITUDE;
+import static com.polizi.iam.polizi.coordinators.SharedRuntimeContent.GPS_LONGITUDE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -94,11 +97,11 @@ public class UserDashboard extends Fragment {
             @Override
             public void onReceive(Context context, Intent intent) {
                 mGeoPoint = new ParseGeoPoint();
-                mGeoPoint.setLatitude(intent.getDoubleExtra(GPSService.GPS_LATITUDE, 0));
-                mGeoPoint.setLongitude(intent.getDoubleExtra(GPSService.GPS_LONGITUDE, 0));
+                mGeoPoint.setLatitude(intent.getDoubleExtra(GPS_LATITUDE, 0));
+                mGeoPoint.setLongitude(intent.getDoubleExtra(GPS_LONGITUDE, 0));
             }
         };
-        getActivity().registerReceiver(mReciever, new IntentFilter(GPSService.GPS_FILTER));
+        getActivity().registerReceiver(mReciever, new IntentFilter(GPS_FILTER));
     }
 
     @Override
@@ -147,7 +150,7 @@ public class UserDashboard extends Fragment {
                     message = "Need help";
                 HashMap<String, Object> hashMap = new HashMap<String, Object>();
                 if (mGeoPoint == null) {
-                    Snackbar.make(mView, "We are still trying to get your location", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(mView,"We are still trying to get your location",Snackbar.LENGTH_LONG).show();
                     return;
                     //mGeoPoint = new ParseGeoPoint(19, 72);
                 }
@@ -163,7 +166,7 @@ public class UserDashboard extends Fragment {
                     map.put("userId", ParseInstallation.getCurrentInstallation().getInstallationId());
                     map.put("count", backupCount);
                     map.put("message", message);
-                    map.put("userName", ((PoliziUser) PoliziUser.getCurrentUser()).getProfileName());
+                    map.put("userName",((PoliziUser)PoliziUser.getCurrentUser()).getProfileName());
                     ParseCloud.callFunctionInBackground("SendPush", map, new FunctionCallback<Object>() {
                         @Override
                         public void done(Object object, ParseException e) {
@@ -228,14 +231,10 @@ public class UserDashboard extends Fragment {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 100) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
 
             } else {
                 checkPermissions();
-            }
-            if (grantResults.length > 1) {
-                if (grantResults[1] != PackageManager.PERMISSION_GRANTED)
-                    checkPermissions();
             }
         }
     }

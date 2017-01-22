@@ -13,9 +13,13 @@ import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 import com.polizi.iam.polizi.models.PoliziUser;
 
+import static com.polizi.iam.polizi.coordinators.SharedRuntimeContent.GPS_FILTER;
+import static com.polizi.iam.polizi.coordinators.SharedRuntimeContent.GPS_LATITUDE;
+import static com.polizi.iam.polizi.coordinators.SharedRuntimeContent.GPS_LONGITUDE;
+/*
 import static com.polizi.iam.polizi.service.GPSService.GPS_FILTER;
 import static com.polizi.iam.polizi.service.GPSService.GPS_LATITUDE;
-import static com.polizi.iam.polizi.service.GPSService.GPS_LONGITUDE;
+import static com.polizi.iam.polizi.service.GPSService.GPS_LONGITUDE;*/
 
 /**
  * Created by shubh on 22-01-2017.
@@ -33,6 +37,7 @@ public class LocationListener implements android.location.LocationListener {
 
     public void onLocationChanged(final Location loc) {
         //Log.i("**************************************", "Location changed");
+        //Toast.makeText(mContext,"Got Location",Toast.LENGTH_LONG).show();
         if (isBetterLocation(loc, mPreviousBestLocation)) {
             ParseUser parseUser = PoliziUser.getCurrentUser();
             if (parseUser != null) {
