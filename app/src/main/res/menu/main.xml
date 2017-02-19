@@ -8,5 +8,6 @@
         app:showAsAction="always" />
     <item android:id="@+id/settings_menu"
         android:title="@string/action_settings"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
 </menu>
