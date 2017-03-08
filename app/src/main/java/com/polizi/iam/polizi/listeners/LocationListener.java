@@ -35,7 +35,7 @@ public class LocationListener implements android.location.LocationListener {
     }
 
 
-    public void onLocationChanged(final Location loc) {
+    public void onLocationChanged(Location loc) {
         //Log.i("**************************************", "Location changed");
         //Toast.makeText(mContext,"Got Location",Toast.LENGTH_LONG).show();
         if (isBetterLocation(loc, mPreviousBestLocation)) {
@@ -48,6 +48,7 @@ public class LocationListener implements android.location.LocationListener {
                     ParseInstallation installation = ParseInstallation.getCurrentInstallation();
                     installation.put("Location", geoPoint);
                     installation.put("User", ((PoliziUser) parseUser));
+                    installation.put("isLoggedIn",true);
                     installation.saveInBackground();
                     Intent intent = new Intent(GPS_FILTER);
                     Log.d("Location Service","Got Location ");

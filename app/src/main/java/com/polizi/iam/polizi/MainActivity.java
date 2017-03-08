@@ -1,11 +1,15 @@
 package com.polizi.iam.polizi;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -27,13 +31,11 @@ import com.polizi.iam.polizi.models.PoliziUser;
 import com.polizi.iam.polizi.service.LocationService;
 import com.polizi.iam.polizi.settings.SettingsActivity;
 
-import static com.parse.ParseInstallation.getCurrentInstallation;
-import static com.polizi.iam.polizi.R.id.fab;
 
 public class MainActivity extends AppCompatActivity
         implements OnFragmentInteractionListener, OnLoginListener {
 
-    private FloatingActionButton mCreateUserFAB;
+    //private FloatingActionButton mCreateUserFAB;
     private ViewPager mViewPager;
     private View mNavHeaderView;
     private NavigationView mNavigationView;
@@ -53,14 +55,14 @@ public class MainActivity extends AppCompatActivity
                 MainActivity.this));
 
 
-        mCreateUserFAB = (FloatingActionButton) findViewById(fab);
+        /*mCreateUserFAB = (FloatingActionButton) findViewById(fab);
         mCreateUserFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onFragmentInteraction(1);
                 mCreateUserFAB.hide();
             }
-        });
+        });*/
         mHandler = new Handler();
 
 
@@ -114,7 +116,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.action_log_out) {
-            PoliziUser.logOutInBackground(
+            PoliziUser.checkOutInBackground(
                     new LogOutCallback() {
                         @Override
                         public void done(ParseException e) {
@@ -126,25 +128,22 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
             );
-        if(id == R.id.settings_menu){
-            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-        }
+            if (id == R.id.settings_menu) {
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+            }
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void onLogoutParse() {
-        getCurrentInstallation().put("isLoggedIn",false);
-    }
-
     @Override
     public void onFragmentInteraction(int pageNumber) {
-        if (pageNumber == 0)
+        /*if (pageNumber == 0)
             mCreateUserFAB.show();
         else
             mCreateUserFAB.hide();
+        */
         mViewPager.setCurrentItem(pageNumber, true);
     }
 
@@ -157,38 +156,42 @@ public class MainActivity extends AppCompatActivity
             Runnable menuItem = new Runnable() {
                 @Override
                 public void run() {
-                    stopService(new Intent(getApplicationContext(), LocationService.class));
-                    if(mMenu!=null) {
+                    if (!(Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                            && ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+                        ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+                        installation.put("isLoggedIn", false);
+                        installation.saveInBackground();
+                        stopService(new Intent(getApplicationContext(), LocationService.class));
+                    }
+                    if (mMenu != null) {
                         MenuItem item = mMenu.findItem(R.id.action_log_out);
                         if (item != null)
                             item.setVisible(false);
                         else
                             mHandler.postDelayed(this, 500);
-                    }else{
+                    } else {
                         mHandler.postDelayed(this, 500);
                     }
                 }
             };
             mHandler.postDelayed(menuItem, 1000);
             isLoggedIn = false;
-            ParseInstallation installation =ParseInstallation.getCurrentInstallation();
-            installation.put("isLoggedIn",false);
-            installation.saveInBackground();
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+
         } else if (parseUser instanceof PoliziUser) {
-            ParseInstallation installation =ParseInstallation.getCurrentInstallation();
-            installation.put("isLoggedIn",true);
-            installation.saveInBackground();
             isLoggedIn = true;
             onFragmentInteraction(2);
             Runnable menuItem = new Runnable() {
                 @Override
                 public void run() {
-                    startService(new Intent(getApplicationContext(), LocationService.class));
+                    if (!(Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                            && ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED))
+                        startService(new Intent(getApplicationContext(), LocationService.class));
                     mMenu.findItem(R.id.action_log_out).setVisible(true);
                 }
             };
             mHandler.postDelayed(menuItem, 1000);
-            getCurrentInstallation().put("isLoggedIn",true);
         }
 
     }
@@ -220,5 +223,5 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onStop() {
         super.onStop();
-     }
+    }
 }

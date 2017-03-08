@@ -91,7 +91,7 @@
                         android:textSize="@dimen/sub_title_content" />
                 </RelativeLayout>
             </android.support.v7.widget.CardView>
-
+<!--
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -131,7 +131,7 @@
                         android:textSize="@dimen/sub_title_content"
                         android:windowSoftInputMode="stateVisible|adjustResize" />
                 </RelativeLayout>
-            </android.support.v7.widget.CardView>
+            </android.support.v7.widget.CardView>-->
 
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"

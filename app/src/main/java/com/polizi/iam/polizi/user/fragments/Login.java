@@ -116,7 +116,7 @@ public class Login extends Fragment {
             return isLoggedIn;
         }
 
-        PoliziUser.logInInBackground(username, password, new LogInCallback() {
+        PoliziUser.checkInInBackground(username, password, new LogInCallback() {
             @Override
             public void done(ParseUser user, ParseException e) {
 

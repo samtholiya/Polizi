@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
@@ -47,7 +48,11 @@ public class LocationService extends Service {
 
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, listener);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
+            Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            Log.d(getClass().getName(),"Last Location "+location.getLatitude() +" "+location.getLongitude());
+            listener.onLocationChanged(location);
         }
+
         return START_NOT_STICKY;
     }
 
