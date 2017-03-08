@@ -38,6 +38,13 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
+    <string-array name="template_msg">
+        <item>Need Help</item>
+        <item>Emergency Here</item>
+        <item>Suspect Found</item>
+        <item>Need backup ASAP</item>
+        <item>Medical Emergency here</item>
+    </string-array>
 
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>

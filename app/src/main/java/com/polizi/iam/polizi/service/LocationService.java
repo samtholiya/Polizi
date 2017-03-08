@@ -49,8 +49,9 @@ public class LocationService extends Service {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, listener);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);
             Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            Log.d(getClass().getName(),"Last Location "+location.getLatitude() +" "+location.getLongitude());
-            listener.onLocationChanged(location);
+            //Log.d(getClass().getName(),"Last Location "+location.getLatitude() +" "+location.getLongitude());
+            if (location != null)
+                listener.onLocationChanged(location);
         }
 
         return START_NOT_STICKY;
@@ -94,7 +95,6 @@ public class LocationService extends Service {
         t.start();
         return t;
     }
-
 
 
 }

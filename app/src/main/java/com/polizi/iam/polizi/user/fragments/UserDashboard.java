@@ -13,12 +13,12 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatSpinner;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.parse.FunctionCallback;
@@ -63,9 +63,11 @@ public class UserDashboard extends Fragment {
     private TextView mDesignation;
     private Button mCallBackup;
     //private EditText mUnitCount;
-    private EditText mUnitMessage;
+    private AppCompatSpinner mUnitMessage;
 
     private ParseGeoPoint mGeoPoint;
+    private TextView mContact;
+    private TextView mAddress;
 
     public UserDashboard() {
         // Required empty public constructor
@@ -102,14 +104,16 @@ public class UserDashboard extends Fragment {
                 mGeoPoint.setLongitude(intent.getDoubleExtra(GPS_LONGITUDE, 0));
             }
         };
-        getActivity().registerReceiver(mReciever, new IntentFilter(GPS_FILTER));
+
+        //getActivity().registerReceiver(mReciever, new IntentFilter(GPS_FILTER));
     }
 
     @Override
     public void onResume() {
         super.onResume();
         checkPermissions();
-
+        if (mReciever != null)
+            getActivity().registerReceiver(mReciever, new IntentFilter(GPS_FILTER));
     }
 
     @Override
@@ -119,6 +123,10 @@ public class UserDashboard extends Fragment {
         mView = inflater.inflate(R.layout.fragment_user_dashboard, container, false);
         mProfileName = (TextView) mView.findViewById(R.id.dash_name);
         mDesignation = (TextView) mView.findViewById(R.id.dash_designation);
+        mContact = (TextView) mView.findViewById(R.id.contact_value);
+//        mContact.setText();
+        mAddress = (TextView) mView.findViewById(R.id.address_value);
+
         ParseUser parseUser = PoliziUser.getCurrentUser();
         if (parseUser instanceof PoliziUser) {
             PoliziUser poliziUser = (PoliziUser) parseUser;
@@ -128,16 +136,16 @@ public class UserDashboard extends Fragment {
                 mProfileName.setText(profileName);
             if (!designation.isEmpty())
                 mDesignation.setText(designation);
+            mContact.setText(poliziUser.getMobileNumber());
+            mAddress.setText(poliziUser.getAddress());
         }
         //mUnitCount = (EditText) mView.findViewById(R.id.backup_count);
-        mUnitMessage = (EditText) mView.findViewById(R.id.backup_message);
+        mUnitMessage = (AppCompatSpinner) mView.findViewById(R.id.backup_message);
         mCallBackup = (Button) mView.findViewById(R.id.call_backup);
         mCallBackup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("Dash", "executing======================");
-                //String count = mUnitCount.getText().toString();
-                String message = mUnitMessage.getText().toString();
+                String message = mUnitMessage.getSelectedItem().toString();
 
                 int backupCount = 0;
                 //if (count.length() > 0)
